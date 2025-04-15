@@ -1,0 +1,219 @@
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import ApartmentCard from "@/components/ui/data-display/ApartmentCard";
+import ApartmentModal from "@/components/ui/modals/ApartmentModal";
+import ConfirmDeleteModal from "@/components/ui/modals/ConfirmDeleteModal";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { ApartmentWithAssignedEmployees, Employee } from "@shared/schema";
+import { ApartmentFormData } from "@/components/ui/modals/types";
+
+export default function Home() {
+  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"date" | "name">("date");
+  const [isApartmentModalOpen, setIsApartmentModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [currentApartment, setCurrentApartment] = useState<ApartmentWithAssignedEmployees | undefined>(undefined);
+  const [apartmentToDelete, setApartmentToDelete] = useState<{ id: number, name: string } | null>(null);
+
+  // Fetch apartments
+  const { data: apartments, isLoading: isLoadingApartments } = useQuery<ApartmentWithAssignedEmployees[]>({
+    queryKey: [`/api/apartments?sortBy=${sortBy}${searchQuery ? `&search=${searchQuery}` : ''}`],
+  });
+
+  // Fetch employees for the apartment form
+  const { data: employees = [] } = useQuery<Employee[]>({
+    queryKey: ['/api/employees'],
+  });
+
+  // Create apartment mutation
+  const createApartmentMutation = useMutation({
+    mutationFn: (data: ApartmentFormData) => 
+      apiRequest('POST', '/api/apartments', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/apartments'] });
+      toast({
+        title: "Successo",
+        description: "Ordine creato con successo",
+      });
+      setIsApartmentModalOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Errore",
+        description: `Errore durante la creazione: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Update apartment mutation
+  const updateApartmentMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number, data: ApartmentFormData }) => 
+      apiRequest('PUT', `/api/apartments/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/apartments'] });
+      toast({
+        title: "Successo",
+        description: "Ordine aggiornato con successo",
+      });
+      setIsApartmentModalOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Errore",
+        description: `Errore durante l'aggiornamento: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Delete apartment mutation
+  const deleteApartmentMutation = useMutation({
+    mutationFn: (id: number) => 
+      apiRequest('DELETE', `/api/apartments/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/apartments'] });
+      toast({
+        title: "Successo",
+        description: "Ordine eliminato con successo",
+      });
+      setIsDeleteModalOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Errore",
+        description: `Errore durante l'eliminazione: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Event handlers
+  const handleOpenAddModal = () => {
+    setCurrentApartment(undefined);
+    setIsApartmentModalOpen(true);
+  };
+
+  const handleOpenEditModal = (id: number) => {
+    const apartment = apartments?.find(apt => apt.id === id);
+    setCurrentApartment(apartment);
+    setIsApartmentModalOpen(true);
+  };
+
+  const handleOpenDeleteModal = (id: number, name: string) => {
+    setApartmentToDelete({ id, name });
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleApartmentSubmit = (data: ApartmentFormData) => {
+    if (currentApartment) {
+      updateApartmentMutation.mutate({ id: currentApartment.id, data });
+    } else {
+      createApartmentMutation.mutate(data);
+    }
+  };
+
+  const handleDeleteConfirm = () => {
+    if (apartmentToDelete) {
+      deleteApartmentMutation.mutate(apartmentToDelete.id);
+    }
+  };
+
+  const isPending = createApartmentMutation.isPending || 
+                    updateApartmentMutation.isPending || 
+                    deleteApartmentMutation.isPending;
+
+  return (
+    <>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="relative flex-grow max-w-md">
+          <Input
+            type="search"
+            placeholder="Cerca ordini..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+          />
+          <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        </div>
+        <div className="flex items-center space-x-3">
+          <div className="relative">
+            <select 
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as "date" | "name")}
+              className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+            >
+              <option value="date">ORDINA PER DATA</option>
+              <option value="name">ORDINA PER NOME</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <i className="fas fa-chevron-down text-xs"></i>
+            </div>
+          </div>
+          <Button 
+            onClick={handleOpenAddModal}
+            disabled={isPending}
+            className="bg-[#70fad3] hover:bg-[#70fad3]/90 text-dark font-medium px-4 py-2 rounded-lg transition-colors flex items-center"
+          >
+            <i className="fas fa-plus mr-2"></i> AGGIUNGI
+          </Button>
+        </div>
+      </div>
+
+      {isLoadingApartments ? (
+        <div className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#70fad3]"></div>
+          <p className="mt-2 text-gray-600">Caricamento ordini...</p>
+        </div>
+      ) : apartments && apartments.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {apartments.map((apartment) => (
+            <ApartmentCard
+              key={apartment.id}
+              apartment={apartment}
+              onEdit={handleOpenEditModal}
+              onDelete={handleOpenDeleteModal}
+              onClick={() => handleOpenEditModal(apartment.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8 bg-white rounded-lg shadow">
+          <i className="fas fa-home text-gray-300 text-5xl mb-4"></i>
+          <h3 className="text-xl font-medium text-gray-600 mb-2">Nessun ordine trovato</h3>
+          <p className="text-gray-500 mb-4">
+            {searchQuery 
+              ? "Nessun risultato corrisponde alla tua ricerca." 
+              : "Non ci sono ancora ordini. Inizia aggiungendone uno!"}
+          </p>
+          <Button 
+            onClick={handleOpenAddModal}
+            className="bg-[#70fad3] hover:bg-[#70fad3]/90 text-dark font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            <i className="fas fa-plus mr-2"></i> AGGIUNGI ORDINE
+          </Button>
+        </div>
+      )}
+
+      {/* Modals */}
+      <ApartmentModal
+        isOpen={isApartmentModalOpen}
+        onClose={() => setIsApartmentModalOpen(false)}
+        onSubmit={handleApartmentSubmit}
+        apartment={currentApartment}
+        employees={employees}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        message={`Sei sicuro di voler eliminare l'ordine "${apartmentToDelete?.name}"?`}
+      />
+    </>
+  );
+}
