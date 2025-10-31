@@ -1,4 +1,4 @@
-import { eq, and, like, or, inArray, desc, asc, sql } from "drizzle-orm";
+import { eq, and, like, or, inArray, desc, asc, sql, count } from "drizzle-orm";
 import { db } from "./db";
 
 import {
@@ -36,6 +36,9 @@ export interface IStorage {
   // Assignment operations
   createAssignment(assignment: InsertAssignment): Promise<Assignment>;
   deleteAssignmentsByApartment(apartmentId: number): Promise<void>;
+
+  // Statistics operation
+  getStatistics(): Promise<any>; // Potresti definire un tipo più specifico qui
 }
 
 export class DatabaseStorage implements IStorage {
@@ -311,6 +314,105 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(assignments)
       .where(eq(assignments.apartment_id, apartmentId));
+  }
+
+  // Nuova funzione per le statistiche
+  async getStatistics(): Promise<any> {
+    // 1. Ordini totali
+    const [totalOrdersResult] = await db.select({
+      value: count()
+    }).from(apartments);
+    const totalOrders = totalOrdersResult.value;
+
+    // 2. Cliente top
+    const [topEmployeeResult] = await db
+      .select({
+        employee_id: assignments.employee_id,
+        first_name: employees.first_name,
+        last_name: employees.last_name,
+        orderCount: count(assignments.apartment_id)
+      })
+      .from(assignments)
+      .leftJoin(employees, eq(assignments.employee_id, employees.id))
+      .groupBy(assignments.employee_id, employees.first_name, employees.last_name)
+      .orderBy(desc(sql`count(assignments.apartment_id)`))
+      .limit(1);
+
+    const topEmployee = topEmployeeResult ? {
+      name: `${topEmployeeResult.first_name || ''} ${topEmployeeResult.last_name || ''}`.trim(),
+      count: topEmployeeResult.orderCount
+    } : { name: 'N/A', count: 0 };
+
+
+    // 3. Conteggio stato ordini
+    const orderStatusCountsResult = await db
+      .select({
+        status: apartments.status,
+        count: count()
+      })
+      .from(apartments)
+      .groupBy(apartments.status);
+      
+    const orderStatusCounts = orderStatusCountsResult.map(item => ({
+        name: item.status,
+        value: item.count
+    }));
+
+    // 4. Conteggio stato pagamenti
+    const paymentStatusCountsResult = await db
+      .select({
+        status: apartments.payment_status,
+        count: count()
+      })
+      .from(apartments)
+      .groupBy(apartments.payment_status);
+      
+    const paymentStatusCounts = paymentStatusCountsResult.map(item => ({
+        name: item.status,
+        value: item.count
+    }));
+
+    // 5. Ordini per mese (ultimi 6 mesi)
+    const ordersByMonthResult = await db
+      .select({
+        month: sql<string>`to_char(${apartments.cleaning_date}::date, 'YYYY-MM')`,
+        count: count()
+      })
+      .from(apartments)
+      .groupBy(sql`to_char(${apartments.cleaning_date}::date, 'YYYY-MM')`)
+      .orderBy(sql`to_char(${apartments.cleaning_date}::date, 'YYYY-MM') DESC`)
+      .limit(6);
+      
+    const ordersByMonth = ordersByMonthResult.reverse().map(item => ({
+        name: item.month,
+        total: item.count
+    }));
+
+    // 6. Giorno più impegnativo
+    const [busiestDayResult] = await db
+        .select({
+            date: apartments.cleaning_date,
+            count: count()
+        })
+        .from(apartments)
+        .groupBy(apartments.cleaning_date)
+        .orderBy(desc(count()))
+        .limit(1);
+
+    const busiestDay = busiestDayResult ? {
+        date: busiestDayResult.date,
+        count: busiestDayResult.count
+    } : { date: 'N/A', count: 0 };
+
+
+    return {
+      totalOrders,
+      topEmployee,
+      orderStatusCounts,
+      paymentStatusCounts,
+      ordersByMonth,
+      busiestDay
+    };
   }
 }
 
