@@ -26,7 +26,6 @@ export type ApartmentFormData = {
   name: string;
   cleaning_date: string;
   start_time?: string;
-  end_time?: string;
   status: string;
   payment_status: string;
   notes?: string;
