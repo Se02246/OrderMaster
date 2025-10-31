@@ -10,7 +10,6 @@ export const apartments = pgTable("apartments", {
   name: varchar("name", { length: 255 }).notNull(),
   cleaning_date: varchar("cleaning_date", { length: 10 }).notNull(), // format 'YYYY-MM-DD'
   start_time: varchar("start_time", { length: 5 }), // format 'HH:MM'
-  end_time: varchar("end_time", { length: 5 }), // format 'HH:MM'
   status: varchar("status", { length: 20, enum: ["Da Fare", "In Corso", "Fatto"] }).notNull().default("Da Fare"),
   payment_status: varchar("payment_status", { length: 20, enum: ["Da Pagare", "Pagato"] }).notNull().default("Da Pagare"),
   notes: text("notes"),
