@@ -30,6 +30,7 @@ export type ApartmentFormData = {
   payment_status: string;
   notes?: string;
   employee_ids: number[];
+  price?: number;
 };
 
 export type EmployeeFormData = {
