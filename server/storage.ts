@@ -22,23 +22,23 @@ export interface IStorage {
   createApartment(apartment: InsertApartment, employeeIds?: number[]): Promise<ApartmentWithAssignedEmployees>;
   updateApartment(id: number, apartment: InsertApartment, employeeIds?: number[]): Promise<ApartmentWithAssignedEmployees>;
   deleteApartment(id: number): Promise<void>;
-  
+
   // Employee operations
   getEmployees(options?: { search?: string }): Promise<EmployeeWithAssignedApartments[]>;
   getEmployee(id: number): Promise<EmployeeWithAssignedApartments | undefined>;
   createEmployee(employee: InsertEmployee): Promise<Employee>;
   deleteEmployee(id: number): Promise<void>;
-  
+
   // Calendar operations
   getApartmentsByMonth(year: number, month: number): Promise<ApartmentWithAssignedEmployees[]>;
   getApartmentsByDate(year: number, month: number, day: number): Promise<ApartmentWithAssignedEmployees[]>;
-  
+
   // Assignment operations
   createAssignment(assignment: InsertAssignment): Promise<Assignment>;
   deleteAssignmentsByApartment(apartmentId: number): Promise<void>;
 
   // Statistics operation
-  getStatistics(): Promise<any>; // Potresti definire un tipo più specifico qui
+  getStatistics(): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -62,7 +62,7 @@ export class DatabaseStorage implements IStorage {
       .from(apartments)
       .innerJoin(assignments, eq(assignments.apartment_id, apartments.id))
       .where(eq(assignments.employee_id, employeeId));
-      
+
     return results.map(result => ({ 
       id: result.apartments.id,
       name: result.apartments.name,
@@ -100,7 +100,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     const apartmentsList = await query;
-    
+
     // Fetch employees for each apartment
     const results: ApartmentWithAssignedEmployees[] = [];
     for (const apt of apartmentsList) {
@@ -110,7 +110,7 @@ export class DatabaseStorage implements IStorage {
         employees,
       });
     }
-    
+
     return results;
   }
 
@@ -123,7 +123,7 @@ export class DatabaseStorage implements IStorage {
     if (!apartment) return undefined;
 
     const employees = await this.getEmployeesForApartment(id);
-    
+
     return {
       ...apartment,
       employees,
@@ -205,7 +205,7 @@ export class DatabaseStorage implements IStorage {
     query = query.orderBy(asc(employees.last_name), asc(employees.first_name));
 
     const employeesList = await query;
-    
+
     // Fetch apartments for each employee
     const results: EmployeeWithAssignedApartments[] = [];
     for (const emp of employeesList) {
@@ -215,7 +215,7 @@ export class DatabaseStorage implements IStorage {
         apartments,
       });
     }
-    
+
     return results;
   }
 
@@ -228,7 +228,7 @@ export class DatabaseStorage implements IStorage {
     if (!employee) return undefined;
 
     const apartments = await this.getApartmentsForEmployee(id);
-    
+
     return {
       ...employee,
       apartments,
@@ -240,7 +240,7 @@ export class DatabaseStorage implements IStorage {
       .insert(employees)
       .values(employee)
       .returning();
-    
+
     return result;
   }
 
@@ -275,7 +275,7 @@ export class DatabaseStorage implements IStorage {
         employees,
       });
     }
-    
+
     return results;
   }
 
@@ -297,7 +297,7 @@ export class DatabaseStorage implements IStorage {
         employees,
       });
     }
-    
+
     return results;
   }
 
@@ -306,7 +306,7 @@ export class DatabaseStorage implements IStorage {
       .insert(assignments)
       .values(assignment)
       .returning();
-    
+
     return result;
   }
 
@@ -316,7 +316,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(assignments.apartment_id, apartmentId));
   }
 
-  // Nuova funzione per le statistiche
+  // Nuova funzione per le statistiche (semplificata)
   async getStatistics(): Promise<any> {
     // 1. Ordini totali
     const [totalOrdersResult] = await db.select({
@@ -324,8 +324,8 @@ export class DatabaseStorage implements IStorage {
     }).from(apartments);
     const totalOrders = totalOrdersResult.value;
 
-    // 2. Cliente top
-    const [topEmployeeResult] = await db
+    // 2. Top 3 Clienti
+    const topEmployeesResult = await db
       .select({
         employee_id: assignments.employee_id,
         first_name: employees.first_name,
@@ -336,60 +336,15 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(employees, eq(assignments.employee_id, employees.id))
       .groupBy(assignments.employee_id, employees.first_name, employees.last_name)
       .orderBy(desc(sql`count(assignments.apartment_id)`))
-      .limit(1);
+      .limit(3);
 
-    const topEmployee = topEmployeeResult ? {
-      name: `${topEmployeeResult.first_name || ''} ${topEmployeeResult.last_name || ''}`.trim(),
-      count: topEmployeeResult.orderCount
-    } : { name: 'N/A', count: 0 };
-
-
-    // 3. Conteggio stato ordini
-    const orderStatusCountsResult = await db
-      .select({
-        status: apartments.status,
-        count: count()
-      })
-      .from(apartments)
-      .groupBy(apartments.status);
-      
-    const orderStatusCounts = orderStatusCountsResult.map(item => ({
-        name: item.status,
-        value: item.count
+    const topEmployees = topEmployeesResult.map(emp => ({
+      name: `${emp.first_name || ''} ${emp.last_name || ''}`.trim(),
+      count: Number(emp.orderCount)
     }));
 
-    // 4. Conteggio stato pagamenti
-    const paymentStatusCountsResult = await db
-      .select({
-        status: apartments.payment_status,
-        count: count()
-      })
-      .from(apartments)
-      .groupBy(apartments.payment_status);
-      
-    const paymentStatusCounts = paymentStatusCountsResult.map(item => ({
-        name: item.status,
-        value: item.count
-    }));
-
-    // 5. Ordini per mese (ultimi 6 mesi)
-    const ordersByMonthResult = await db
-      .select({
-        month: sql<string>`to_char(${apartments.cleaning_date}::date, 'YYYY-MM')`,
-        count: count()
-      })
-      .from(apartments)
-      .groupBy(sql`to_char(${apartments.cleaning_date}::date, 'YYYY-MM')`)
-      .orderBy(sql`to_char(${apartments.cleaning_date}::date, 'YYYY-MM') DESC`)
-      .limit(6);
-      
-    const ordersByMonth = ordersByMonthResult.reverse().map(item => ({
-        name: item.month,
-        total: item.count
-    }));
-
-    // 6. Giorno più impegnativo
-    const [busiestDayResult] = await db
+    // 3. Top 3 Giorni più produttivi
+    const busiestDaysResult = await db
         .select({
             date: apartments.cleaning_date,
             count: count()
@@ -397,21 +352,17 @@ export class DatabaseStorage implements IStorage {
         .from(apartments)
         .groupBy(apartments.cleaning_date)
         .orderBy(desc(count()))
-        .limit(1);
+        .limit(3);
 
-    const busiestDay = busiestDayResult ? {
-        date: busiestDayResult.date,
-        count: busiestDayResult.count
-    } : { date: 'N/A', count: 0 };
-
+    const busiestDays = busiestDaysResult.map(day => ({
+        date: day.date,
+        count: Number(day.count)
+    }));
 
     return {
       totalOrders,
-      topEmployee,
-      orderStatusCounts,
-      paymentStatusCounts,
-      ordersByMonth,
-      busiestDay
+      topEmployees,
+      busiestDays
     };
   }
 }
