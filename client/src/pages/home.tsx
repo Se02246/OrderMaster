@@ -77,7 +77,7 @@ export default function Home() {
     mutationFn: (data: ApartmentFormData) => 
       apiRequest('POST', '/api/apartments', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/apartments'] });
+      queryClient.invalidateQueries();
       toast({
         title: "Successo",
         description: "Ordine creato con successo",
@@ -98,7 +98,7 @@ export default function Home() {
     mutationFn: ({ id, data }: { id: number, data: ApartmentFormData }) => 
       apiRequest('PUT', `/api/apartments/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/apartments'] });
+      queryClient.invalidateQueries();
       toast({
         title: "Successo",
         description: "Ordine aggiornato con successo",
@@ -119,7 +119,7 @@ export default function Home() {
     mutationFn: (id: number) => 
       apiRequest('DELETE', `/api/apartments/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/apartments'] });
+      queryClient.invalidateQueries();
       toast({
         title: "Successo",
         description: "Ordine eliminato con successo",
