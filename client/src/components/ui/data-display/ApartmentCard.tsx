@@ -1,7 +1,7 @@
 import { format, parseISO } from "date-fns";
 import { it } from "date-fns/locale";
 import { ApartmentWithAssignedEmployees } from "@shared/schema";
-import { Calendar, Clock, Edit, Trash2 } from "lucide-react";
+import { Calendar, Clock, Edit, Trash2, Euro } from "lucide-react";
 
 type ApartmentCardProps = {
   apartment: ApartmentWithAssignedEmployees;
@@ -75,26 +75,32 @@ export default function ApartmentCard({ apartment, onEdit, onDelete, onClick }: 
           </div>
         </div>
         
-        <div className="flex items-center mb-3">
+        <div className="flex items-center mb-3 text-gray-700">
           <Calendar className="text-gray-500 mr-2" size={16} />
-          <span className="text-gray-700">{formattedDate}</span>
+          <span>{formattedDate}</span>
           
           {apartment.start_time && (
             <>
               <span className="mx-2 text-gray-400">|</span>
               <Clock className="text-gray-500 mr-1" size={14} />
-              <span className="text-gray-700">{apartment.start_time}</span>
+              <span>{apartment.start_time}</span>
             </>
           )}
         </div>
         
-        <div className="flex flex-wrap gap-2 mb-3">
+        <div className="flex flex-wrap items-center gap-2 mb-3">
           <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusClass(apartment.status)}`}>
             {apartment.status}
           </span>
           <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPaymentStatusClass(apartment.payment_status)}`}>
             {apartment.payment_status}
           </span>
+          {apartment.price && (
+            <div className="flex items-center text-sm text-gray-800 bg-gray-100 rounded-full px-2 py-1">
+              <Euro size={14} className="mr-1" />
+              <span>{Number(apartment.price).toFixed(2)}</span>
+            </div>
+          )}
         </div>
         
         <div className="text-sm text-gray-600 mb-3">
