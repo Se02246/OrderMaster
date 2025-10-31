@@ -63,7 +63,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(assignments, eq(assignments.apartment_id, apartments.id))
       .where(eq(assignments.employee_id, employeeId));
 
-    return results.map(result => ({ 
+    return results.map(result => ({
       id: result.apartments.id,
       name: result.apartments.name,
       cleaning_date: result.apartments.cleaning_date,
@@ -72,6 +72,7 @@ export class DatabaseStorage implements IStorage {
       status: result.apartments.status,
       payment_status: result.apartments.payment_status,
       notes: result.apartments.notes,
+      price: result.apartments.price,
     }));
   }
 
