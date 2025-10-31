@@ -103,14 +103,14 @@ export default function Employees() {
               placeholder="Cerca clienti..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
             />
             <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
           </div>
           <Button 
             onClick={handleOpenEmployeeModal}
             disabled={isPending}
-            className="bg-[#70fad3] hover:bg-[#70fad3]/90 text-dark font-medium px-4 py-2 rounded-lg transition-colors flex items-center whitespace-nowrap"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-4 py-2 rounded-lg transition-colors flex items-center whitespace-nowrap"
           >
             <i className="fas fa-plus mr-2"></i> AGGIUNGI
           </Button>
@@ -119,7 +119,7 @@ export default function Employees() {
 
       {isLoading ? (
         <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#70fad3]"></div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           <p className="mt-2 text-gray-600">Caricamento clienti...</p>
         </div>
       ) : employees.length > 0 ? (
@@ -144,7 +144,7 @@ export default function Employees() {
           </p>
           <Button 
             onClick={handleOpenEmployeeModal}
-            className="bg-[#70fad3] hover:bg-[#70fad3]/90 text-dark font-medium px-4 py-2 rounded-lg transition-colors"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-4 py-2 rounded-lg transition-colors"
           >
             <i className="fas fa-plus mr-2"></i> AGGIUNGI CLIENTE
           </Button>
