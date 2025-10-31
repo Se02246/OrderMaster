@@ -65,7 +65,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-semibold text-dark">
-              {isEditing ? "Modifica Appartamento" : "Aggiungi Appartamento"}
+              {isEditing ? "Modifica Ordine" : "Aggiungi Ordine"}
             </h3>
             <button 
               onClick={onClose}
@@ -82,7 +82,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">Nome Appartamento</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">Nome Ordine</FormLabel>
                     <FormControl>
                       <Input 
                         {...field} 
@@ -208,7 +208,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                 name="employee_ids"
                 render={() => (
                   <FormItem>
-                    <FormLabel className="block text-sm font-medium text-gray-700">Dipendenti</FormLabel>
+                    <FormLabel className="block text-sm font-medium text-gray-700">Clienti</FormLabel>
                     <div className="border border-gray-300 rounded-lg p-3 max-h-36 overflow-y-auto">
                       {employees.map((employee) => (
                         <FormField
