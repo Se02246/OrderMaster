@@ -35,7 +35,7 @@ export default function EmployeeDetail() {
     mutationFn: ({ id, data }: { id: number, data: ApartmentFormData }) => 
       apiRequest('PUT', `/api/apartments/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/employees/${employeeId}`] });
+      queryClient.invalidateQueries();
       toast({
         title: "Successo",
         description: "Ordine aggiornato con successo",
@@ -56,7 +56,7 @@ export default function EmployeeDetail() {
     mutationFn: (id: number) => 
       apiRequest('DELETE', `/api/apartments/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/employees/${employeeId}`] });
+      queryClient.invalidateQueries();
       toast({
         title: "Successo",
         description: "Ordine eliminato con successo",
