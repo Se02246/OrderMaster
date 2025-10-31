@@ -122,7 +122,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                       <FormControl>
                         <Input
                           {...field}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                         />
                       </FormControl>
                       <FormMessage />
@@ -141,7 +141,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                           <Input
                             {...field}
                             type="date"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                           />
                         </FormControl>
                         <FormMessage />
@@ -159,7 +159,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                           <Input
                             {...field}
                             type="time"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                           />
                         </FormControl>
                         <FormMessage />
@@ -244,7 +244,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                           placeholder="Cerca cliente..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                         />
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                       </div>
@@ -298,7 +298,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                         <Textarea
                           {...field}
                           rows={3}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                         />
                       </FormControl>
                       <FormMessage />
@@ -317,7 +317,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                   </Button>
                   <Button
                     type="submit"
-                    className="px-4 py-2 bg-[#70fad3] hover:bg-[#70fad3]/90 rounded-lg text-dark font-medium"
+                    className="px-4 py-2 bg-primary hover:bg-primary/90 rounded-lg text-primary-foreground font-medium"
                   >
                     {isEditing ? "SALVA" : "CREA"}
                   </Button>
