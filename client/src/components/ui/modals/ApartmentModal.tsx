@@ -23,7 +23,8 @@ const formSchema = z.object({
   status: z.enum(["Da Fare", "In Corso", "Fatto"]),
   payment_status: z.enum(["Da Pagare", "Pagato"]),
   notes: z.string().optional(),
-  employee_ids: z.array(z.number())
+  employee_ids: z.array(z.number()),
+  price: z.coerce.number().min(0, "Il prezzo non può essere negativo").optional(),
 });
 
 export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, employees }: ApartmentModalProps) {
@@ -69,7 +70,8 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
       status: apartment?.status || "Da Fare",
       payment_status: apartment?.payment_status || "Da Pagare",
       notes: apartment?.notes || "",
-      employee_ids: apartment?.employees.map(e => e.id) || []
+      employee_ids: apartment?.employees.map(e => e.id) || [],
+      price: apartment?.price ? Number(apartment.price) : 0,
     }
   });
 
@@ -83,7 +85,8 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
         status: apartment?.status || "Da Fare",
         payment_status: apartment?.payment_status || "Da Pagare",
         notes: apartment?.notes || "",
-        employee_ids: apartment?.employees.map(e => e.id) || []
+        employee_ids: apartment?.employees.map(e => e.id) || [],
+        price: apartment?.price ? Number(apartment.price) : 0,
       });
     }
   }, [isOpen, apartment, form.reset]);
@@ -130,7 +133,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="cleaning_date"
@@ -159,6 +162,25 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                           <Input
                             {...field}
                             type="time"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-700">Prezzo (€)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            step="0.01"
+                            placeholder="Es. 50.00"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                           />
                         </FormControl>
