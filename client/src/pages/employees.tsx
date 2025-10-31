@@ -29,7 +29,7 @@ export default function Employees() {
     mutationFn: (data: EmployeeFormData) => 
       apiRequest('POST', '/api/employees', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/employees'] });
+      queryClient.invalidateQueries();
       toast({
         title: "Successo",
         description: "Cliente creato con successo",
@@ -50,7 +50,7 @@ export default function Employees() {
     mutationFn: (id: number) => 
       apiRequest('DELETE', `/api/employees/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/employees'] });
+      queryClient.invalidateQueries();
       toast({
         title: "Successo",
         description: "Cliente eliminato con successo",
