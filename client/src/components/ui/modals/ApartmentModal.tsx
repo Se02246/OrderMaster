@@ -20,7 +20,6 @@ const formSchema = z.object({
   name: z.string().min(1, "Il nome è obbligatorio"),
   cleaning_date: z.string().min(1, "La data è obbligatoria"),
   start_time: z.string().optional(),
-  end_time: z.string().optional(),
   status: z.enum(["Da Fare", "In Corso", "Fatto"]),
   payment_status: z.enum(["Da Pagare", "Pagato"]),
   notes: z.string().optional(),
@@ -67,7 +66,6 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
       name: apartment?.name || "",
       cleaning_date: apartment?.cleaning_date || "",
       start_time: apartment?.start_time || "",
-      end_time: apartment?.end_time || "",
       status: apartment?.status || "Da Fare",
       payment_status: apartment?.payment_status || "Da Pagare",
       notes: apartment?.notes || "",
@@ -82,7 +80,6 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
         name: apartment?.name || "",
         cleaning_date: apartment?.cleaning_date || "",
         start_time: apartment?.start_time || "",
-        end_time: apartment?.end_time || "",
         status: apartment?.status || "Da Fare",
         payment_status: apartment?.payment_status || "Da Pagare",
         notes: apartment?.notes || "",
@@ -94,7 +91,6 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
   const handleEmployeeSubmit = (data: EmployeeFormData) => {
     createEmployeeMutation.mutate(data);
   };
-
 
   if (!isOpen) return null;
 
@@ -134,7 +130,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="cleaning_date"
@@ -158,25 +154,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                     name="start_time"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">Da (orario)</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="time"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="end_time"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700">A (orario)</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">Ora</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
