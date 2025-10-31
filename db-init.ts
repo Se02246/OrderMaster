@@ -20,7 +20,8 @@ async function main() {
       end_time VARCHAR(5),
       status VARCHAR(20) NOT NULL DEFAULT 'Da Fare',
       payment_status VARCHAR(20) NOT NULL DEFAULT 'Da Pagare',
-      notes TEXT
+      notes TEXT,
+      price NUMERIC(10, 2)
     )
   `);
 
