@@ -1,19 +1,17 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, PlusCircle } from "lucide-react";
+import { X } from "lucide-react";
 import { ApartmentModalProps, ApartmentFormData } from "./types";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 
-// Form schema for the apartment
+// Form schema
 const formSchema = z.object({
   name: z.string().min(1, "Il nome è obbligatorio"),
   cleaning_date: z.string().min(1, "La data è obbligatoria"),
@@ -25,20 +23,10 @@ const formSchema = z.object({
   employee_ids: z.array(z.number())
 });
 
-// Form schema for adding a new employee
-const newEmployeeSchema = z.object({
-    first_name: z.string().min(1, "Il nome è obbligatorio"),
-    last_name: z.string().min(1, "Il cognome è obbligatorio"),
-});
-
 export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, employees }: ApartmentModalProps) {
-  const { toast } = useToast();
   const isEditing = !!apartment;
-  const [showAddEmployee, setShowAddEmployee] = useState(false);
-  const [newEmployee, setNewEmployee] = useState({ first_name: '', last_name: '' });
-  const [employeeSearch, setEmployeeSearch] = useState('');
 
-  // Initialize the main apartment form
+  // Initialize form
   const form = useForm<ApartmentFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,37 +41,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
     }
   });
 
-  // Function to handle adding a new employee
-  const handleAddNewEmployee = async () => {
-      const result = newEmployeeSchema.safeParse(newEmployee);
-      if (!result.success) {
-          toast({ title: "Errore", description: "Nome e cognome sono obbligatori.", variant: "destructive" });
-          return;
-      }
-
-      try {
-          await apiRequest('POST', '/api/employees', newEmployee);
-          await queryClient.invalidateQueries({ queryKey: ['/api/employees'] });
-          toast({ title: "Successo", description: "Dipendente aggiunto con successo." });
-          setNewEmployee({ first_name: '', last_name: '' });
-          setShowAddEmployee(false);
-      } catch (error: any) {
-          toast({ title: "Errore", description: `Errore durante l'aggiunta: ${error.message}`, variant: "destructive" });
-      }
-  };
-
-  // Filter employees based on the search input
-  const filteredEmployees = useMemo(() => {
-    if (!employeeSearch) {
-        return employees;
-    }
-    return employees.filter(employee =>
-        `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(employeeSearch.toLowerCase())
-    );
-  }, [employees, employeeSearch]);
-
-
-  // Reset form when the modal opens or the apartment data changes
+  // Reset form when apartment changes
   useEffect(() => {
     if (isOpen) {
       form.reset({
@@ -96,8 +54,6 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
         notes: apartment?.notes || "",
         employee_ids: apartment?.employees.map(e => e.id) || []
       });
-      setEmployeeSearch('');
-      setShowAddEmployee(false);
     }
   }, [isOpen, apartment, form.reset]);
 
@@ -111,14 +67,14 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
             <h3 className="text-xl font-semibold text-dark">
               {isEditing ? "Modifica Appartamento" : "Aggiungi Appartamento"}
             </h3>
-            <button
+            <button 
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
             >
               <X size={20} />
             </button>
           </div>
-
+          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               <FormField
@@ -128,16 +84,16 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">Nome Appartamento</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+                      <Input 
+                        {...field} 
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]" 
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
+              
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
@@ -146,17 +102,17 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">Data</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          type="date"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+                        <Input 
+                          {...field} 
+                          type="date" 
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]" 
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
+                
                 <FormField
                   control={form.control}
                   name="start_time"
@@ -164,17 +120,17 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">Da (orario)</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          type="time"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+                        <Input 
+                          {...field} 
+                          type="time" 
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]" 
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
+                
                 <FormField
                   control={form.control}
                   name="end_time"
@@ -182,10 +138,10 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">A (orario)</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          type="time"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+                        <Input 
+                          {...field} 
+                          type="time" 
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]" 
                         />
                       </FormControl>
                       <FormMessage />
@@ -193,7 +149,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                   )}
                 />
               </div>
-
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -201,7 +157,10 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">Stato</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Seleziona uno stato" />
@@ -217,14 +176,17 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                     </FormItem>
                   )}
                 />
-
+                
                 <FormField
                   control={form.control}
                   name="payment_status"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">Pagamento</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Seleziona stato pagamento" />
@@ -240,73 +202,53 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                   )}
                 />
               </div>
-
-              <FormItem>
-                <FormLabel className="block text-sm font-medium text-gray-700">Dipendenti</FormLabel>
-                <div className="border border-gray-300 rounded-lg p-3">
-                    <Input
-                        type="search"
-                        placeholder="Cerca dipendente..."
-                        value={employeeSearch}
-                        onChange={(e) => setEmployeeSearch(e.target.value)}
-                        className="mb-3 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
-                    />
-                  <div className="max-h-36 overflow-y-auto">
-                    {filteredEmployees.map((employee) => (
-                      <FormField
-                        key={employee.id}
-                        control={form.control}
-                        name="employee_ids"
-                        render={({ field }) => (
-                            <FormItem
-                              key={employee.id}
-                              className="flex items-center mb-2 last:mb-0"
-                            >
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value?.includes(employee.id)}
-                                  onCheckedChange={(checked) => {
-                                    const newValue = checked
-                                      ? [...field.value, employee.id]
-                                      : field.value?.filter((value) => value !== employee.id);
-                                    field.onChange(newValue);
-                                  }}
-                                />
-                              </FormControl>
-                              <FormLabel className="ml-2 text-sm text-gray-700">
-                                {employee.first_name} {employee.last_name}
-                              </FormLabel>
-                            </FormItem>
-                          )}
-                      />
-                    ))}
-                  </div>
-                  <Button type="button" variant="link" onClick={() => setShowAddEmployee(!showAddEmployee)} className="p-0 h-auto mt-2 text-sm text-[#70fad3] hover:text-[#70fad3]/80">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    {showAddEmployee ? 'Annulla' : 'Aggiungi nuovo dipendente'}
-                  </Button>
-
-                  {showAddEmployee && (
-                    <div className="mt-4 p-4 border rounded-lg space-y-3 bg-gray-50">
-                        <Input
-                            placeholder="Nome"
-                            value={newEmployee.first_name}
-                            onChange={e => setNewEmployee({ ...newEmployee, first_name: e.target.value })}
-                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+              
+              <FormField
+                control={form.control}
+                name="employee_ids"
+                render={() => (
+                  <FormItem>
+                    <FormLabel className="block text-sm font-medium text-gray-700">Dipendenti</FormLabel>
+                    <div className="border border-gray-300 rounded-lg p-3 max-h-36 overflow-y-auto">
+                      {employees.map((employee) => (
+                        <FormField
+                          key={employee.id}
+                          control={form.control}
+                          name="employee_ids"
+                          render={({ field }) => {
+                            return (
+                              <FormItem
+                                key={employee.id}
+                                className="flex items-center mb-2 last:mb-0"
+                              >
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(employee.id)}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([...field.value, employee.id])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== employee.id
+                                            )
+                                          )
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="ml-2 text-sm text-gray-700">
+                                  {employee.first_name} {employee.last_name}
+                                </FormLabel>
+                              </FormItem>
+                            )
+                          }}
                         />
-                        <Input
-                            placeholder="Cognome"
-                            value={newEmployee.last_name}
-                            onChange={e => setNewEmployee({ ...newEmployee, last_name: e.target.value })}
-                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
-                        />
-                        <Button type="button" onClick={handleAddNewEmployee} className="w-full bg-[#70fad3] hover:bg-[#70fad3]/90 text-dark font-medium">Aggiungi Dipendente</Button>
+                      ))}
                     </div>
-                  )}
-                </div>
-                <FormMessage />
-              </FormItem>
-
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <FormField
                 control={form.control}
                 name="notes"
@@ -314,17 +256,17 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">Note</FormLabel>
                     <FormControl>
-                      <Textarea
-                        {...field}
+                      <Textarea 
+                        {...field} 
                         rows={3}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#70fad3]/50 focus:border-[#70fad3]" 
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
+              
               <div className="mt-8 flex justify-end space-x-3">
                 <Button
                   type="button"
