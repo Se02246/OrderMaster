@@ -79,13 +79,11 @@ export default function ApartmentCard({ apartment, onEdit, onDelete, onClick }: 
           <Calendar className="text-gray-500 mr-2" size={16} />
           <span className="text-gray-700">{formattedDate}</span>
           
-          {apartment.start_time && apartment.end_time && (
+          {apartment.start_time && (
             <>
               <span className="mx-2 text-gray-400">|</span>
               <Clock className="text-gray-500 mr-1" size={14} />
               <span className="text-gray-700">{apartment.start_time}</span>
-              <span className="mx-1 text-gray-400">-</span>
-              <span className="text-gray-700">{apartment.end_time}</span>
             </>
           )}
         </div>
