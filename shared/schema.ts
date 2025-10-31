@@ -70,6 +70,7 @@ export type InsertAssignment = z.infer<typeof insertAssignmentSchema>;
 // Extended schemas for API operations
 export const apartmentWithEmployeesSchema = z.object({
   ...insertApartmentSchema.shape,
+  price: z.union([z.string(), z.number()]).optional().nullable(), // Modifica: Accetta sia stringa che numero
   employee_ids: z.array(z.number()).optional(),
 });
 
