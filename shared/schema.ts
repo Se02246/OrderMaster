@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, serial, integer, primaryKey, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, primaryKey, timestamp, varchar, numeric } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -13,6 +13,7 @@ export const apartments = pgTable("apartments", {
   status: varchar("status", { length: 20, enum: ["Da Fare", "In Corso", "Fatto"] }).notNull().default("Da Fare"),
   payment_status: varchar("payment_status", { length: 20, enum: ["Da Pagare", "Pagato"] }).notNull().default("Da Pagare"),
   notes: text("notes"),
+  price: numeric("price", { precision: 10, scale: 2 }), // Added price field
 });
 
 // Employees table
