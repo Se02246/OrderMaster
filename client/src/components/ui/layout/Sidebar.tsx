@@ -28,6 +28,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       path: "/employees", 
       label: "CLIENTI", 
       icon: "fa-users" 
+    },
+    { 
+      path: "/statistics", 
+      label: "STATISTICHE", 
+      icon: "fa-chart-pie" 
     }
   ];
 
