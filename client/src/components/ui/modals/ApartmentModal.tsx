@@ -41,7 +41,7 @@ export default function ApartmentModal({ isOpen, onClose, onSubmit, apartment, e
     mutationFn: (data: EmployeeFormData) =>
       apiRequest('POST', '/api/employees', data),
     onSuccess: (newEmployee) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/employees'] });
+      queryClient.invalidateQueries();
       toast({
         title: "Successo",
         description: "Cliente creato con successo",
