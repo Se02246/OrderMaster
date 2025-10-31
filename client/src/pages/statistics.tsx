@@ -1,75 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { 
-  ChartContainer, 
-  ChartTooltipContent, 
-  ChartLegend,
-  type ChartConfig 
-} from "@/components/ui/chart";
-import { 
-  PieChart, 
-  Pie, 
-  Cell, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer 
-} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClipboardList, Trophy, CalendarClock } from "lucide-react";
 import { formatDateForDisplay } from "@/lib/date-utils";
-import { parse, format } from "date-fns";
-import { it } from "date-fns/locale";
 
-// Definisco i tipi per i dati delle statistiche
+// Definisco i nuovi tipi per i dati
+type TopEmployee = {
+  name: string;
+  count: number;
+};
+
+type ProductiveDay = {
+  date: string;
+  count: number;
+};
+
 type StatisticsData = {
   totalOrders: number;
-  topEmployee: {
-    name: string;
-    count: number;
-  };
-  orderStatusCounts: { name: string; value: number }[];
-  paymentStatusCounts: { name: string; value: number }[];
-  ordersByMonth: { name: string; total: number }[];
-  busiestDay: {
-    date: string;
-    count: number;
-  };
+  topEmployees: TopEmployee[];
+  busiestDays: ProductiveDay[];
 };
-
-// Definisco i colori per i grafici
-const PIE_COLORS = {
-  "Da Fare": "hsl(var(--chart-5))", // Rosso/Arancio
-  "In Corso": "hsl(var(--chart-3))", // Giallo
-  "Fatto": "hsl(var(--chart-2))", // Verde
-  "Da Pagare": "hsl(var(--chart-5))", // Rosso/Arancio
-  "Pagato": "hsl(var(--chart-2))", // Verde
-};
-
-// Configurazioni per i grafici
-const orderStatusConfig = {
-  orders: { label: "Ordini" },
-  "Da Fare": { label: "Da Fare", color: PIE_COLORS["Da Fare"] },
-  "In Corso": { label: "In Corso", color: PIE_COLORS["In Corso"] },
-  "Fatto": { label: "Fatto", color: PIE_COLORS["Fatto"] },
-} satisfies ChartConfig;
-
-const paymentStatusConfig = {
-  payments: { label: "Pagamenti" },
-  "Da Pagare": { label: "Da Pagare", color: PIE_COLORS["Da Pagare"] },
-  "Pagato": { label: "Pagato", color: PIE_COLORS["Pagato"] },
-} satisfies ChartConfig;
-
-const monthlyChartConfig = {
-  total: {
-    label: "Totale Ordini",
-    color: "hsl(var(--chart-2))",
-  },
-} satisfies ChartConfig;
-
 
 export default function Statistics() {
   const { data: stats, isLoading, isError } = useQuery<StatisticsData>({
@@ -95,23 +44,13 @@ export default function Statistics() {
     );
   }
 
-  // Formattazione dati per il grafico mensile
-  const monthlyData = stats.ordersByMonth.map(item => ({
-    name: format(parse(item.name, 'yyyy-MM', new Date()), 'LLL yyyy', { locale: it }),
-    total: item.total
-  }));
-  
-  // Formattazione giorno più impegnativo
-  const formattedBusiestDay = stats.busiestDay.date !== 'N/A' 
-    ? formatDateForDisplay(stats.busiestDay.date)
-    : 'N/A';
-
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-dark">Statistiche</h2>
-      
-      {/* Griglia Metriche Principali */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      {/* Griglia Metriche */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Ordini Totali */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ordini Totali</CardTitle>
@@ -122,144 +61,55 @@ export default function Statistics() {
             <p className="text-xs text-muted-foreground">Totale ordini registrati</p>
           </CardContent>
         </Card>
-        
+
+        {/* Top 3 Clienti */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cliente Top</CardTitle>
-            <Trophy className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-yellow-500" />
+              Top 3 Clienti
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.topEmployee.name}</div>
-            <p className="text-xs text-muted-foreground">
-              Con {stats.topEmployee.count} {stats.topEmployee.count === 1 ? 'ordine' : 'ordini'}
-            </p>
+            {stats.topEmployees.length > 0 ? (
+              <ol className="list-decimal list-inside space-y-2">
+                {stats.topEmployees.map((employee, index) => (
+                  <li key={index} className="text-sm">
+                    <span className="font-medium">{employee.name || "Cliente non definito"}</span>
+                    <span className="text-muted-foreground"> ({employee.count} {employee.count === 1 ? 'ordine' : 'ordini'})</span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nessun dato disponibile.</p>
+            )}
           </CardContent>
         </Card>
 
+        {/* Top 3 Giorni Produttivi */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Giorno più Impegnativo</CardTitle>
-            <CalendarClock className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <CalendarClock className="h-5 w-5 text-blue-500" />
+              Top 3 Giorni Produttivi
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formattedBusiestDay}</div>
-            <p className="text-xs text-muted-foreground">
-              Con {stats.busiestDay.count} {stats.busiestDay.count === 1 ? 'ordine' : 'ordini'}
-            </p>
+            {stats.busiestDays.length > 0 ? (
+              <ol className="list-decimal list-inside space-y-2">
+                {stats.busiestDays.map((day, index) => (
+                  <li key={index} className="text-sm">
+                    <span className="font-medium">{formatDateForDisplay(day.date)}</span>
+                    <span className="text-muted-foreground"> ({day.count} {day.count === 1 ? 'ordine' : 'ordini'})</span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+               <p className="text-sm text-muted-foreground">Nessun dato disponibile.</p>
+            )}
           </CardContent>
         </Card>
       </div>
-
-      {/* Griglia Grafici */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Grafico Ordini Mensili */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Ordini per Mese (Ultimi 6 Mesi)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={monthlyChartConfig} className="h-[250px] w-full">
-              <BarChart data={monthlyData} accessibilityLayer>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="name"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                  tickFormatter={(value) => value.charAt(0).toUpperCase() + value.slice(1)}
-                />
-                <YAxis allowDecimals={false} />
-                <Tooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                <Bar 
-                  dataKey="total" 
-                  fill="var(--color-total)" 
-                  radius={4} 
-                />
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-
-        {/* Grafico Torta Stato Ordini */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Stato Ordini</CardTitle>
-            <CardDescription>Distribuzione dello stato degli ordini</CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center">
-            <ChartContainer config={orderStatusConfig} className="h-[250px] w-full">
-              <PieChart>
-                <Tooltip content={<ChartTooltipContent hideLabel />} />
-                <Pie
-                  data={stats.orderStatusCounts}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                  label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-                >
-                  {stats.orderStatusCounts.map((entry) => (
-                    <Cell key={`cell-${entry.name}`} fill={PIE_COLORS[entry.name as keyof typeof PIE_COLORS]} />
-                  ))}
-                </Pie>
-                <ChartLegend
-                  content={<ChartLegend content={undefined} />}
-                  className="-mt-4"
-                />
-              </PieChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Grafico Torta Stato Pagamenti */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Stato Pagamenti</CardTitle>
-            <CardDescription>Distribuzione dello stato dei pagamenti</CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center">
-            <ChartContainer config={paymentStatusConfig} className="h-[250px] w-full">
-              <PieChart>
-                <Tooltip content={<ChartTooltipContent hideLabel />} />
-                <Pie
-                  data={stats.paymentStatusCounts}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                  label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-                >
-                  {stats.paymentStatusCounts.map((entry) => (
-                    <Cell key={`cell-${entry.name}`} fill={PIE_COLORS[entry.name as keyof typeof PIE_COLORS]} />
-                  ))}
-                </Pie>
-                <ChartLegend
-                  content={<ChartLegend content={undefined} />}
-                  className="-mt-4"
-                />
-              </PieChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-        
-        {/* Placeholder per un altro grafico */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Altre Statistiche</CardTitle>
-            <CardDescription>Un'altra visualizzazione dati.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex items-center justify-center h-[250px]">
-            <p className="text-muted-foreground">Grafico in arrivo...</p>
-          </CardContent>
-        </Card>
-      </div>
-
     </div>
   );
 }
