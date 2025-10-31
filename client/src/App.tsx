@@ -9,6 +9,7 @@ import Calendar from "@/pages/calendar";
 import CalendarDay from "@/pages/calendar-day";
 import Employees from "@/pages/employees";
 import EmployeeDetail from "@/pages/employee-detail";
+import Statistics from "@/pages/statistics"; // Importa la nuova pagina
 import Sidebar from "@/components/ui/layout/Sidebar";
 import Header from "@/components/ui/layout/Header";
 
@@ -34,6 +35,7 @@ function Router() {
             <Route path="/calendar/:year/:month/:day" component={CalendarDay} />
             <Route path="/employees" component={Employees} />
             <Route path="/employees/:id" component={EmployeeDetail} />
+            <Route path="/statistics" component={Statistics} /> {/* Aggiungi la nuova rotta */}
             <Route component={NotFound} />
           </Switch>
         </main>
