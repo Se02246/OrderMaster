@@ -155,7 +155,7 @@ export default function CalendarDay() {
         <i className="fas fa-exclamation-triangle text-yellow-500 text-5xl mb-4"></i>
         <h3 className="text-xl font-medium text-gray-600 mb-2">Data non valida</h3>
         <Link href="/calendar">
-          <a className="mt-4 inline-block text-[#70fad3] hover:underline">
+          <a className="mt-4 inline-block text-primary hover:underline">
             <i className="fas fa-arrow-left mr-2"></i> Torna al calendario
           </a>
         </Link>
@@ -178,7 +178,7 @@ export default function CalendarDay() {
         <Button 
           onClick={handleOpenAddModal}
           disabled={isPending}
-          className="bg-[#70fad3] hover:bg-[#70fad3]/90 text-dark font-medium px-4 py-2 rounded-lg transition-colors flex items-center"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-4 py-2 rounded-lg transition-colors flex items-center"
         >
           <i className="fas fa-plus mr-2"></i> AGGIUNGI
         </Button>
@@ -186,7 +186,7 @@ export default function CalendarDay() {
 
       {isLoadingApartments ? (
         <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#70fad3]"></div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           <p className="mt-2 text-gray-600">Caricamento ordini...</p>
         </div>
       ) : apartments.length > 0 ? (
@@ -210,7 +210,7 @@ export default function CalendarDay() {
           </p>
           <Button 
             onClick={handleOpenAddModal}
-            className="bg-[#70fad3] hover:bg-[#70fad3]/90 text-dark font-medium px-4 py-2 rounded-lg transition-colors"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-4 py-2 rounded-lg transition-colors"
           >
             <i className="fas fa-plus mr-2"></i> AGGIUNGI ORDINE
           </Button>
