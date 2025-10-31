@@ -65,12 +65,12 @@ export default function CalendarGrid({ year, month, apartments, onMonthChange }:
         <div
           key={dateStr}
           className={`h-28 border p-1 cursor-pointer hover:bg-gray-50 transition-colors relative group ${
-            isToday ? 'bg-[#70fad3]/10' : ''
+            isToday ? 'bg-primary/10' : ''
           }`}
           onClick={() => navigate(`/calendar/${year}/${month}/${day}`)}
           data-date={dateStr}
         >
-          <div className={`absolute top-1 left-1 font-medium ${isToday ? 'text-[#70fad3]' : ''}`}>
+          <div className={`absolute top-1 left-1 font-medium ${isToday ? 'text-primary' : ''}`}>
             {day}
           </div>
 
@@ -79,7 +79,7 @@ export default function CalendarGrid({ year, month, apartments, onMonthChange }:
               {dayApartments.slice(0, 2).map(apt => (
                 <div
                   key={apt.id}
-                  className="bg-[#70fad3]/20 rounded px-1 py-0.5 text-xs truncate"
+                  className="bg-primary/20 rounded px-1 py-0.5 text-xs truncate"
                   title={apt.name}
                 >
                   {apt.name}
